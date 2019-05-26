@@ -1,7 +1,6 @@
 import pickle as pkl
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+from tensorflow import keras, nn
 
 
 def load_data():
@@ -30,8 +29,8 @@ def divide_data(data_to_divide):
 
 x_train, y_train, x_val, y_val = divide_data(data)
 model = keras.Sequential([
-    keras.layers.Dense(128, activation=tf.nn.relu),
-    keras.layers.Dense(10, activation=tf.nn.softmax)
+    keras.layers.Dense(128, activation=nn.relu),
+    keras.layers.Dense(10, activation=nn.softmax)
 ])
 
 model.compile(optimizer='adam',
