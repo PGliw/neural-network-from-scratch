@@ -1,5 +1,7 @@
 import pickle as pkl
 import numpy as np
+import tensorflow as tf
+from tensorflow import keras
 
 
 def load_data():
@@ -27,3 +29,15 @@ def divide_data(data_to_divide):
 
 
 x_train, y_train, x_val, y_val = divide_data(data)
+model = keras.Sequential([
+    keras.layers.Dense(128, activation=tf.nn.relu),
+    keras.layers.Dense(10, activation=tf.nn.softmax)
+])
+
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+model.fit(x_train, y_train, epochs=5)
+total_loss, test_acc = model.evaluate(x_val, y_val)
+print(total_loss, test_acc)
