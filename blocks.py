@@ -47,8 +47,8 @@ class Neuron:
         self.input_size = input_size
         self.activation_function = activation_function
         np.random.seed(random_seed)
-        self.weights = np.random.rand(input_size, 1) if weights is None else weights
-        self.bias = np.random.rand(1) if bias is None else bias
+        self.weights = np.random.rand(input_size) if weights is None else weights
+        self.bias = np.random.rand() if bias is None else bias
 
     def produce(self, xs):
         return np.dot(xs, self.weights)+self.bias

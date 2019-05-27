@@ -9,6 +9,10 @@ class TestNeuronMethods(unittest.TestCase):
     def test_activation_fun(self):
         self.assertEqual(self.neuron.activation_function(0), 0.5, "incorrect activation function")
 
+    def test_randoms(self):
+        neuron_rand = blocks.Neuron(5, lambda x: blocks.sigmoid(x))
+        self.assertEqual(len(neuron_rand.weights), 5)
+
     def test_produce(self):
         self.assertEqual(self.neuron.produce([1, 2, 3]), 11)
 
