@@ -1,7 +1,8 @@
 import unittest
 import blocks
+import sample
 
-
+"""
 class TestNeuronMethods(unittest.TestCase):
     def setUp(self):
         self.neuron = blocks.Neuron(3, lambda x: blocks.sigmoid(x), [3, 2, 1], 1, 37)
@@ -18,3 +19,13 @@ class TestNeuronMethods(unittest.TestCase):
 
     def test_predict(self):
         self.assertAlmostEqual(self.neuron.predict([1, 2, 3]), 0.99998329)
+
+
+class TestLayer(unittest.TestCase):
+    def setUp(self):
+        self.layer = blocks.Layer(2, 3, lambda x: blocks.sigmoid(x),
+                                  lambda x: blocks.sigmoid_der(x),
+
+                                  )
+
+"""

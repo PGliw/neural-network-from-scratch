@@ -15,73 +15,91 @@ def softmax(x):
 
 
 def mean_squared_error(y_pred, y_true):
-    pass
+    return np.mean(np.power(y_true - y_pred, 2))
+
+
+def mean_squared_error_der(y_pred, y_true):
+    return 2*(y_pred-y_true)/y_true.size
 
 
 class Layer:
-    def __init__(self, neurons_number: int, input_size: int, activation_function, weightss=None, biases=None):
-        # self.neurons_number = neurons_number
-        self.activation_function = activation_function
+    def __init__(self, input_size: int, neurons_number: int, activation_function, activation_function_der, weights=None, biases=None):
+        """
+        :param input_size: integer, size of layer's input
+        :param neurons_number: number of neurons in the layer
+        :param activation_function: activation function for neurons in layer
+        :param weights: matrix NxM where N is number of neurons and M is number of inputs
+        :param biases: 1xN array where N is number of neurons
+        """
         self.input_size = input_size
         self.neurons_number = neurons_number
-        self.neurons = []
-        for n in range(neurons_number):
-            self.neurons.append(Neuron(input_size, activation_function))
-
-    def predict(self, xs):
-        output = []
-        for neuron in self.neurons:
-            output.append(neuron.predict(xs))
-        return np.array(output)
-
-
-class Neuron:
-    def __init__(self, input_size: int, activation_function, weights=None, bias=None, random_seed=37):
-        """
-        :param input_size: size of input data
-        :param activation_function: activation function: ex. lambda:x -> sigmoid(x)
-        :param weights: np.array of weights for the neuron
-        :param bias: int - bias for the neuron
-        :param random_seed: int, used to initialize weights and bias
-        """
-        self.input_size = input_size
         self.activation_function = activation_function
-        np.random.seed(random_seed)
-        self.weights = np.random.rand(input_size) if weights is None else weights
-        self.bias = np.random.rand() if bias is None else bias
-
-    def produce(self, xs):
-        return np.dot(xs, self.weights)+self.bias
+        self.activation_function_der = activation_function_der
+        self.neurons_number = neurons_number
+        self.weights = np.random.rand(input_size, neurons_number) if weights is None else weights
+        self.bias = np.random.rand(1, neurons_number) if biases is None else biases
+        self.xs = np.zeros([input_size, 1])
+        self.xs_mul_ws = np.zeros([input_size, 1])
 
     def predict(self, xs):
-        """
-        :param xs: nd.array of size self.input_size
-        :return: one value between 0 and 1
-        """
-        return self.activation_function(self.produce(xs))
+        self.xs = xs
+        product = np.dot(xs, self.weights) + self.bias
+        self.xs_mul_ws = product
+        return self.activation_function(product)
+
+    def propagate_back(self, error_out, learning_rate):
+        error_pre_activation = self.activation_function_der(self.xs_mul_ws) * error_out
+        #   error back propagation
+        error_in = np.dot(error_pre_activation, self.weights.T)    # T = transpose
+        error_weights = np.dot(self.xs.T, error_pre_activation)
+        #   adjust parameters
+        self.learn(error_weights, error_pre_activation, learning_rate)
+        #   propagate the error
+        return error_in
+
+    def learn(self, error_weights, error_out, learning_rate):
+        self.weights -= learning_rate * error_weights
+        self.bias -= learning_rate * error_out
 
 
 class Model:
-    def __init__(self, layers_list):
+    def __init__(self, layers_list, cost_function, cost_function_der):
         self.layers_list = layers_list
+        self.cost_function = cost_function
+        self.cost_function_der = cost_function_der
 
-    def fit(self, x_train, y_train, epochs_number: int):
+    def predict(self, x):
         """
+        :param x: D x 1 vector of features
+        :return: M x 1 vector of results
+        """
+        # predictions for one piece of data
+        prediction = x
+        for layer in self.layers_list:
+            #   predict and pass result as an input for the next layer
+            prediction = layer.predict(prediction)
+        #   append the final prediction for vector x
+        return prediction
+
+    def fit(self, x_train, y_train, epochs_number: int, learning_rate):
+        """
+        :param learning_rate: alpha parameter for weights correction in one step (float)
         :param x_train: array of 42 000 1296-elem-lists
         :param y_train: array of 42 000 true labels
         :param epochs_number: number of epochs
         :return:
         """
         for epoch in range(epochs_number):
-            #   feed - forward
-            inputs = x_train
-            for layer in self.layers_list:
-                inputs = layer.predict(inputs)
-            outputs = inputs  # must be 10d vector
-            error = outputs - y_train
-            #   compare outputs vs y_train
-
-
-layer = Layer(10, 10, lambda x: sigmoid(x))
-prediction = layer.predict([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-print(prediction)
+            data_pieces_errors = []
+            for x, y in zip(x_train, y_train):
+                #   predict
+                prediction = self.predict(x)
+                #   calc error
+                error_for_data_piece = self.cost_function(prediction, y)
+                data_pieces_errors.append(error_for_data_piece)
+                #   propagate the error back and learn
+                error = self.cost_function_der(prediction, y)
+                for layer in reversed(self.layers_list):
+                    error = layer.propagate_back(error, learning_rate)
+            average_epoch_error = np.mean(data_pieces_errors)
+            print("epoch {} error={}".format(epoch, average_epoch_error))

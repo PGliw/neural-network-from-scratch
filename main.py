@@ -1,6 +1,7 @@
 import pickle as pkl
 import numpy as np
 from tensorflow import keras, nn
+import blocks
 
 
 def load_data():
@@ -28,6 +29,8 @@ def divide_data(data_to_divide):
 
 
 x_train, y_train, x_val, y_val = divide_data(data)
+
+
 model = keras.Sequential([
     keras.layers.Dense(128, activation=nn.relu),
     keras.layers.Dense(10, activation=nn.softmax)
@@ -40,3 +43,23 @@ model.compile(optimizer='adam',
 model.fit(x_train, y_train, epochs=5)
 total_loss, test_acc = model.evaluate(x_val, y_val)
 print(total_loss, test_acc)
+
+
+"""
+model = blocks.Model(
+    layers_list=[
+        blocks.Layer(1296,
+                     128,
+                     lambda x: blocks.sigmoid(x),
+                     lambda x:blocks.sigmoid_der(x)),
+        blocks.Layer(128,
+                     10,
+                     lambda x: blocks.sigmoid(x),
+                     lambda x: blocks.sigmoid_der(x))
+    ],
+    cost_function=lambda y_pred, y_true: blocks.mean_squared_error(y_pred, y_true),
+    cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
+)
+
+model.fit(x_train, y_train, epochs_number=1000, learning_rate=0.9)
+"""
