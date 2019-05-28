@@ -28,9 +28,25 @@ def divide_data(data_to_divide):
     return x_train, y_train, x_val, y_val
 
 
-x_train, y_train, x_val, y_val = divide_data(data)
+def ys_to_one_hot(ys):
+    inputs = np.array(ys)
+    one_hot_size = len(set(inputs))
+    outputs = np.zeros((len(ys), one_hot_size))
+    outputs[np.arange(len(ys)), inputs] = 1
+    return outputs
+
+def reshape_x_data(x_data):
+    return np.reshape(x_data, (len(x_data), 1, len(x_data[0])))
+
+x_train_raw, y_train_raw, x_val_raw, y_val_raw = divide_data(data)
+x_train = reshape_x_data(x_train_raw)
+x_val = reshape_x_data(x_val_raw)
+y_train = ys_to_one_hot(y_train_raw)
+y_val = ys_to_one_hot(y_val_raw)
 
 
+
+"""
 model = keras.Sequential([
     keras.layers.Dense(128, activation=nn.relu),
     keras.layers.Dense(10, activation=nn.softmax)
@@ -43,9 +59,8 @@ model.compile(optimizer='adam',
 model.fit(x_train, y_train, epochs=5)
 total_loss, test_acc = model.evaluate(x_val, y_val)
 print(total_loss, test_acc)
-
-
 """
+
 model = blocks.Model(
     layers_list=[
         blocks.Layer(1296,
@@ -62,4 +77,3 @@ model = blocks.Model(
 )
 
 model.fit(x_train, y_train, epochs_number=1000, learning_rate=0.9)
-"""
