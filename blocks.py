@@ -1,5 +1,11 @@
 import numpy as np
 
+"""
+Literature used for implementation of MLP prediction model:
+1. https://www.tensorflow.org/tutorials/keras/basic_classification (codelab)
+2. https://stackabuse.com/creating-a-neural-network-from-scratch-in-python-multi-class-classification (article)
+3. https://medium.com/datadriveninvestor/math-neural-network-from-scratch-in-python-d6da9f29ce65 (article)
+"""
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))

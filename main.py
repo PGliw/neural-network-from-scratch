@@ -1,6 +1,5 @@
 import pickle as pkl
 import numpy as np
-from tensorflow import keras, nn
 import blocks
 
 
@@ -9,6 +8,18 @@ def load_data():
     with open(PICKLE_FILE_PATH, 'rb') as f:
         return pkl.load(f)
 
+
+def save_hyper_params(model_hyper_params):
+    SAVED_FILE_PATH = 'params.pkl'
+    pickle_out = open(SAVED_FILE_PATH, "wb")
+    pkl.dump(model_hyper_params, pickle_out)
+    pickle_out.close()
+
+
+def load_hyper_params():
+    SAVED_FILE_PATH = 'params.pkl'
+    pickle_in = open(SAVED_FILE_PATH, "rb")
+    return pkl.load(pickle_in)
 
 data = load_data()
 
@@ -35,64 +46,63 @@ def ys_to_one_hot(ys):
     outputs[np.arange(len(ys)), inputs] = 1
     return outputs
 
+
 def reshape_x_data(x_data):
     return np.reshape(x_data, (len(x_data), 1, len(x_data[0])))
 
+
+def train_model(whole_data):
+    """
+    :param whole_data: train and test data
+    :return: list of model parameters - pairs (weights, biases) for each layer
+    """
+    x_train_raw, y_train_raw, x_val_raw, y_val_raw = divide_data(whole_data)
+    x_train = reshape_x_data(x_train_raw)
+    x_val = reshape_x_data(x_val_raw)
+    y_train = ys_to_one_hot(y_train_raw)
+    y_val = ys_to_one_hot(y_val_raw)
+
+    model = blocks.Model(
+        layers_list=[
+            blocks.Layer(1296,
+                         128,
+                         lambda x: blocks.sigmoid(x),
+                         lambda x:blocks.sigmoid_der(x)),
+            blocks.Layer(128,
+                         10,
+                         lambda x: blocks.sigmoid(x),
+                         lambda x: blocks.sigmoid_der(x))
+        ],
+        cost_function=lambda y_pred, y_true: blocks.mean_squared_error(y_pred, y_true),
+        cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
+    )
+
+    pre_preds = []
+    for x in x_val[0:10]:
+        pre_preds.append(np.argmax(model.predict(x)))
+
+    model.fit(x_train[:1000], y_train[:1000], epochs_number=10, learning_rate=0.1)
+
+    post_preds = []
+    for x in x_val[0:10]:
+        post_preds.append(np.argmax(model.predict(x)))
+
+    pre_accuracy = np.sum(pre_preds == y_val_raw[0:10])
+    post_accuracy = np.sum(post_preds == y_val_raw[0:10])
+    print(pre_preds, pre_accuracy, "\n", post_preds, post_accuracy, "\n", y_val_raw[0:10])
+
+    return model.get_hyper_params()
+
+
+#   hyper_params = train_model(data)
+#   save_hyper_params(hyper_params)
+
 x_train_raw, y_train_raw, x_val_raw, y_val_raw = divide_data(data)
-x_train = reshape_x_data(x_train_raw)
 x_val = reshape_x_data(x_val_raw)
-y_train = ys_to_one_hot(y_train_raw)
-y_val = ys_to_one_hot(y_val_raw)
 
-
-
-"""
-model = keras.Sequential([
-    keras.layers.Dense(128, activation=nn.relu),
-    keras.layers.Dense(10, activation=nn.softmax)
-])
-
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-
-model.fit(x_train, y_train, epochs=5)
-total_loss, test_acc = model.evaluate(x_val, y_val)
-print(total_loss, test_acc)
-"""
-
-model = blocks.Model(
-    layers_list=[
-        blocks.Layer(1296,
-                     128,
-                     lambda x: blocks.sigmoid(x),
-                     lambda x:blocks.sigmoid_der(x)),
-        blocks.Layer(128,
-                     10,
-                     lambda x: blocks.sigmoid(x),
-                     lambda x: blocks.sigmoid_der(x))
-    ],
-    cost_function=lambda y_pred, y_true: blocks.mean_squared_error(y_pred, y_true),
-    cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
-)
-
-pre_preds = []
-for x in x_val[0:10]:
-    pre_preds.append(np.argmax(model.predict(x)))
-
-model.fit(x_train[:1000], y_train[:1000], epochs_number=10, learning_rate=0.1)
-
-post_preds = []
-for x in x_val[0:10]:
-    post_preds.append(np.argmax(model.predict(x)))
-
-pre_accuracy = np.sum(pre_preds == y_val_raw[0:10])
-post_accuracy = np.sum(post_preds == y_val_raw[0:10])
-print(pre_preds, pre_accuracy, "\n", post_preds, post_accuracy, "\n", y_val_raw[0:10])
-
-hyper_params = model.get_hyper_params()
-weights_l1, biases_l1 = hyper_params[0]
-weights_l2, biases_l2 = hyper_params[1]
+loaded_hyper_params = load_hyper_params()
+weights_l1, biases_l1 = loaded_hyper_params[0]
+weights_l2, biases_l2 = loaded_hyper_params[1]
 
 model2 = blocks.Model(
     layers_list=[
@@ -113,15 +123,11 @@ model2 = blocks.Model(
     cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
 )
 
-pre_preds = []
-for x in x_val[0:10]:
-    pre_preds.append(np.argmax(model2.predict(x)))
 
 post_preds = []
 for x in x_val[0:10]:
     post_preds.append(np.argmax(model2.predict(x)))
 
 print("Model 2.:")
-pre_accuracy = np.sum(pre_preds == y_val_raw[0:10])
 post_accuracy = np.sum(post_preds == y_val_raw[0:10])
-print(pre_preds, pre_accuracy, "\n", post_preds, post_accuracy, "\n", y_val_raw[0:10])
+print(post_preds, post_accuracy, "\n", y_val_raw[0:10])
