@@ -36,8 +36,10 @@ class Layer:
         self.activation_function = activation_function
         self.activation_function_der = activation_function_der
         self.neurons_number = neurons_number
-        self.weights = np.random.rand(input_size, neurons_number) - 0.5 if weights is None else weights
-        self.bias = np.random.rand(1, neurons_number) - 0.5 if biases is None else biases
+        # self.weights = np.random.rand(input_size, neurons_number) if weights is None else weights
+        self.weights = np.random.uniform(-0.5, 0.5, (input_size, neurons_number)) if weights is None else weights
+        # self.bias = np.random.rand(1, neurons_number) if biases is None else biases
+        self.bias = np.random.uniform(-0.5, 0.5, (1, neurons_number)) if biases is None else biases
         self.xs = np.zeros([input_size, 1])
         self.xs_mul_ws = np.zeros([input_size, 1])
 
@@ -103,3 +105,12 @@ class Model:
                     error = layer.propagate_back(error, learning_rate)
             average_epoch_error = np.mean(data_pieces_errors)
             print("epoch {} error={}".format(epoch, average_epoch_error))
+
+    def get_hyper_params(self):
+        """
+        :return: list of tuples (weights, bias) for each layer
+        """
+        hyper_params_list = []
+        for layer in self.layers_list:
+            hyper_params_list.append((layer.weights, layer.bias))
+        return hyper_params_list

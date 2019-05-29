@@ -86,4 +86,42 @@ post_preds = []
 for x in x_val[0:10]:
     post_preds.append(np.argmax(model.predict(x)))
 
-print(pre_preds, "\n", post_preds, "\n", y_val_raw[0:10])
+pre_accuracy = np.sum(pre_preds == y_val_raw[0:10])
+post_accuracy = np.sum(post_preds == y_val_raw[0:10])
+print(pre_preds, pre_accuracy, "\n", post_preds, post_accuracy, "\n", y_val_raw[0:10])
+
+hyper_params = model.get_hyper_params()
+weights_l1, biases_l1 = hyper_params[0]
+weights_l2, biases_l2 = hyper_params[1]
+
+model2 = blocks.Model(
+    layers_list=[
+        blocks.Layer(1296,
+                     128,
+                     lambda x: blocks.sigmoid(x),
+                     lambda x:blocks.sigmoid_der(x),
+                     weights=weights_l1,
+                     biases=biases_l1),
+        blocks.Layer(128,
+                     10,
+                     lambda x: blocks.sigmoid(x),
+                     lambda x: blocks.sigmoid_der(x),
+                     weights=weights_l2,
+                     biases=biases_l2)
+    ],
+    cost_function=lambda y_pred, y_true: blocks.mean_squared_error(y_pred, y_true),
+    cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
+)
+
+pre_preds = []
+for x in x_val[0:10]:
+    pre_preds.append(np.argmax(model2.predict(x)))
+
+post_preds = []
+for x in x_val[0:10]:
+    post_preds.append(np.argmax(model2.predict(x)))
+
+print("Model 2.:")
+pre_accuracy = np.sum(pre_preds == y_val_raw[0:10])
+post_accuracy = np.sum(post_preds == y_val_raw[0:10])
+print(pre_preds, pre_accuracy, "\n", post_preds, post_accuracy, "\n", y_val_raw[0:10])
