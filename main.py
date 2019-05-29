@@ -2,22 +2,21 @@ import pickle as pkl
 import numpy as np
 import blocks
 
+PICKLE_FILE_PATH = 'train.pkl'
+SAVED_FILE_PATH = 'params.pkl'
 
 def load_data():
-    PICKLE_FILE_PATH = 'train.pkl'
     with open(PICKLE_FILE_PATH, 'rb') as f:
         return pkl.load(f)
 
 
 def save_hyper_params(model_hyper_params):
-    SAVED_FILE_PATH = 'params.pkl'
     pickle_out = open(SAVED_FILE_PATH, "wb")
     pkl.dump(model_hyper_params, pickle_out)
     pickle_out.close()
 
 
 def load_hyper_params():
-    SAVED_FILE_PATH = 'params.pkl'
     pickle_in = open(SAVED_FILE_PATH, "rb")
     return pkl.load(pickle_in)
 
@@ -51,7 +50,7 @@ def reshape_x_data(x_data):
     return np.reshape(x_data, (len(x_data), 1, len(x_data[0])))
 
 
-def train_model(whole_data):
+def train_model(whole_data, batch_size):
     """
     :param whole_data: train and test data
     :return: list of model parameters - pairs (weights, biases) for each layer
@@ -81,7 +80,7 @@ def train_model(whole_data):
     for x in x_val[0:10]:
         pre_preds.append(np.argmax(model.predict(x)))
 
-    model.fit(x_train[:1000], y_train[:1000], epochs_number=10, learning_rate=0.1)
+    model.fit(x_train[:batch_size], y_train[:batch_size], epochs_number=10, learning_rate=0.1)
 
     post_preds = []
     for x in x_val[0:10]:
@@ -94,7 +93,7 @@ def train_model(whole_data):
     return model.get_hyper_params()
 
 
-#   hyper_params = train_model(data)
+#   hyper_params = train_model(data, 5000)
 #   save_hyper_params(hyper_params)
 
 x_train_raw, y_train_raw, x_val_raw, y_val_raw = divide_data(data)
@@ -124,10 +123,7 @@ model2 = blocks.Model(
 )
 
 
-post_preds = []
-for x in x_val[0:10]:
-    post_preds.append(np.argmax(model2.predict(x)))
-
-print("Model 2.:")
-post_accuracy = np.sum(post_preds == y_val_raw[0:10])
-print(post_preds, post_accuracy, "\n", y_val_raw[0:10])
+predictions = model2.batch_predict(x_val[:2500])
+print(predictions, y_val_raw[:2500])
+accuracy = np.sum(predictions == y_val_raw[:2500])/2500
+print(accuracy)

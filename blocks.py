@@ -89,6 +89,17 @@ class Model:
         #   append the final prediction for vector x
         return prediction
 
+    def batch_predict(self, xs):
+        """
+        :param xs: NxD matrix with data
+        :return: Nx1 vector of labels {0, 1, ... , 9}
+        """
+        predictions = []
+        for x in xs:
+            prediction_vector = self.predict(x)
+            predictions.append(np.argmax(prediction_vector))
+        return predictions
+
     def fit(self, x_train, y_train, epochs_number: int, learning_rate):
         """
         :param learning_rate: alpha parameter for weights correction in one step (float)
