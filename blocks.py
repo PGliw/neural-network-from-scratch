@@ -36,8 +36,8 @@ class Layer:
         self.activation_function = activation_function
         self.activation_function_der = activation_function_der
         self.neurons_number = neurons_number
-        self.weights = np.random.rand(input_size, neurons_number) if weights is None else weights
-        self.bias = np.random.rand(1, neurons_number) if biases is None else biases
+        self.weights = np.random.rand(input_size, neurons_number) - 0.5 if weights is None else weights
+        self.bias = np.random.rand(1, neurons_number) - 0.5 if biases is None else biases
         self.xs = np.zeros([input_size, 1])
         self.xs_mul_ws = np.zeros([input_size, 1])
 
@@ -91,14 +91,14 @@ class Model:
         """
         for epoch in range(epochs_number):
             data_pieces_errors = []
-            for x, y in zip(x_train, y_train):
+            for i in range(len(x_train)):
                 #   predict
-                prediction = self.predict(x)
+                prediction = self.predict(x_train[i])
                 #   calc error
-                error_for_data_piece = self.cost_function(prediction, y)
+                error_for_data_piece = self.cost_function(prediction, y_train[i])
                 data_pieces_errors.append(error_for_data_piece)
                 #   propagate the error back and learn
-                error = self.cost_function_der(prediction, y)
+                error = self.cost_function_der(prediction, y_train[i])
                 for layer in reversed(self.layers_list):
                     error = layer.propagate_back(error, learning_rate)
             average_epoch_error = np.mean(data_pieces_errors)

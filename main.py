@@ -76,4 +76,14 @@ model = blocks.Model(
     cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
 )
 
-model.fit(x_train, y_train, epochs_number=1000, learning_rate=0.9)
+pre_preds = []
+for x in x_val[0:10]:
+    pre_preds.append(np.argmax(model.predict(x)))
+
+model.fit(x_train[:1000], y_train[:1000], epochs_number=10, learning_rate=0.1)
+
+post_preds = []
+for x in x_val[0:10]:
+    post_preds.append(np.argmax(model.predict(x)))
+
+print(pre_preds, "\n", post_preds, "\n", y_val_raw[0:10])
