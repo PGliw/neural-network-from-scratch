@@ -1,7 +1,7 @@
 import unittest
 import blocks
 import sample
-import main
+import content
 import numpy as np
 
 """
@@ -34,11 +34,11 @@ class TestLayer(unittest.TestCase):
 
 class TestDataUnpacking(unittest.TestCase):
     def test_ys_to_one_hot(self):
-        self.assertEqual(main.ys_to_one_hot([1, 2, 3, 0, 3]).shape[0], 5)
-        self.assertEqual(main.ys_to_one_hot([1, 2, 3, 0, 3]).shape[1], 4)
+        self.assertEqual(content.ys_to_one_hot([1, 2, 3, 0, 3]).shape[0], 5)
+        self.assertEqual(content.ys_to_one_hot([1, 2, 3, 0, 3]).shape[1], 4)
 
         self.assertEqual(
-            main.ys_to_one_hot([1, 2, 3, 0, 4]).all(),
+            content.ys_to_one_hot([1, 2, 3, 0, 4]).all(),
             np.all(
                 [[0, 1, 0, 0],
                  [0, 0, 1, 0],
@@ -48,18 +48,18 @@ class TestDataUnpacking(unittest.TestCase):
         )
 
     def test_reshape_x_data(self):
-        self.assertEqual(main.reshape_x_data(
+        self.assertEqual(content.reshape_x_data(
                 [[1, 2, 3, 4],
                  [5, 6, 7, 8],
                  [9, 10, 11, 12]]
             ).shape[1], 3)
-        self.assertEqual(main.reshape_x_data(
+        self.assertEqual(content.reshape_x_data(
             [[1, 2, 3, 4],
              [5, 6, 7, 8],
              [9, 10, 11, 12]]
         ).shape[2], 4)
         self.assertEqual(
-            main.reshape_x_data(
+            content.reshape_x_data(
                 [[1, 2, 3, 4],
                  [5, 6, 7, 8],
                  [9, 10, 11, 12]]
