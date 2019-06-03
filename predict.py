@@ -19,7 +19,11 @@ def predict(x):
     Funkcja pobiera macierz przykladow zapisanych w macierzy X o wymiarach NxD i zwraca wektor y o wymiarach Nx1,
     gdzie kazdy element jest z zakresu {0, ..., 9} i oznacza znak rozpoznany na danym przykladzie.
     :param x: macierz o wymiarach NxD
+    type(x) = np.ndarray
+    shape(x) = (N, 1296)
     :return: wektor o wymiarach Nx1
+    type(predictions) = np.ndarray
+    shape(predictions) = (N, 1)
     """
     loaded_hyper_params = load_hyper_params()
     weights_l1, biases_l1 = loaded_hyper_params[0]
@@ -45,5 +49,9 @@ def predict(x):
         cost_function_der=lambda y_pred, y_true: blocks.mean_squared_error_der(y_pred, y_true)
     )
 
-    predictions = model2.batch_predict(x_reshaped)
+    predictions_list = model2.batch_predict(x_reshaped)
+    N = len(predictions_list)
+    predictions = np.reshape(predictions_list, (N, 1))
+    print("Type: ", type(predictions))
+    print("Shape: ", predictions.shape)
     return predictions

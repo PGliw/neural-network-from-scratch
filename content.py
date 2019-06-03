@@ -22,7 +22,7 @@ def load_hyper_params():
     pickle_in = open(SAVED_FILE_PATH, "rb")
     return pkl.load(pickle_in)
 
-data = load_data()
+# data = load_data()
 
 def divide_data(data_to_divide):
     """
@@ -30,8 +30,8 @@ def divide_data(data_to_divide):
     :return: tuple (x_train, y_train, x_val, y_val)
     """
     VALIDATE_BATCH_SIZE = 18000
-    xs = data[0]
-    ys = data[1]
+    xs = data_to_divide[0]
+    ys = data_to_divide[1]
     x_train = xs[:-VALIDATE_BATCH_SIZE]
     y_train = ys[:-VALIDATE_BATCH_SIZE]
     x_val = xs[-VALIDATE_BATCH_SIZE:]
