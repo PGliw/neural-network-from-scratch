@@ -118,7 +118,6 @@ class Model:
                 for layer in reversed(self.layers_list):
                     error = layer.propagate_back(error, learning_rate)
 
-
     def get_hyper_params(self):
         """
         :return: list of tuples (weights, bias) for each layer

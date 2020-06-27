@@ -1,6 +1,7 @@
 import numpy as np
-from content import load_data
+
 from content import divide_data
+from content import load_data
 from predict import predict
 
 data = load_data()
@@ -10,5 +11,5 @@ print(type(x_val))
 print(x_val.shape)
 predictions = predict(x_val)
 print(predictions)
-#accuracy = np.sum(predictions == y_val_raw)/len(y_val_raw)
-#print(accuracy)
+# accuracy = np.sum(predictions == y_val_raw)/len(y_val_raw)
+# print(accuracy)

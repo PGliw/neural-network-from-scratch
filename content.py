@@ -1,5 +1,7 @@
 import pickle as pkl
+
 import numpy as np
+
 import blocks
 
 PICKLE_FILE_PATH = 'train.pkl'
@@ -21,6 +23,7 @@ def save_hyper_params(model_hyper_params):
 def load_hyper_params():
     pickle_in = open(SAVED_FILE_PATH, "rb")
     return pkl.load(pickle_in)
+
 
 # data = load_data()
 
@@ -67,7 +70,7 @@ def train_model(whole_data, batch_size):
             blocks.Layer(1296,
                          128,
                          lambda x: blocks.sigmoid(x),
-                         lambda x:blocks.sigmoid_der(x)),
+                         lambda x: blocks.sigmoid_der(x)),
             blocks.Layer(128,
                          10,
                          lambda x: blocks.sigmoid(x),
